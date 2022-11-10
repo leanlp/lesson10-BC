@@ -3,10 +3,12 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { ERC20Burnable__factory, ERC20__factory, ERC721__factory, MyERC20, MyERC20__factory, MyERC721__factory, TokenSale, TokenSale__factory } from "../typechain-types";
+import { MyERC721 } from "../typechain-types/contracts/MyERC721.sol";
 
 
 
-const TEST_RATIO = 1;
+const TEST_RATIO = 5;
+const NFT_PRICE = ethers.utils.parseEther("0.1");
 
 
 
@@ -14,6 +16,7 @@ describe("NFT Shop", async () => {
 let accounts: SignerWithAddress[];
 let tokenSaleContract: TokenSale;  //declaring this variable, in the this arrow function scope whole the test. here incluidin in typechain
 let paymentTokenContract: MyERC20;
+let nftContract: MyERC721;
 let erc20ContractFactory: MyERC20__factory;
 let erc721ContractFactory: MyERC721__factory;
 let tokenSaleContractFactory: TokenSale__factory;
@@ -32,25 +35,33 @@ let tokenSaleContractFactory: TokenSale__factory;
    
     paymentTokenContract = await erc20ContractFactory.deploy()
     await paymentTokenContract.deployed() as MyERC20
+    nftContract = await erc721ContractFactory.deploy();
+    await nftContract.deployed();
     
     tokenSaleContract= await tokenSaleContractFactory.deploy(
-      TEST_RATIO, 
+      TEST_RATIO,
+      NFT_PRICE, 
       paymentTokenContract.address,
+      nftContract.address
       );
       await tokenSaleContract.deployed();
       const MINTER_ROLE = await paymentTokenContract.MINTER_ROLE();
-       const roleTx = await paymentTokenContract.grantRole(
+      const roleTX = await paymentTokenContract.grantRole(
       MINTER_ROLE, 
       tokenSaleContract.address
     );
-    await roleTx.wait();
-    
+    await roleTX.wait();
+    const roleTX2 = await nftContract.grantRole(
+      MINTER_ROLE,
+      tokenSaleContract.address
+    );
+    await roleTX2.wait();
   });
 
   describe("When the Shop contract is deployed", async () => {
     it("defines the ratio as provided in parameters", async () => {
      const ratio= await tokenSaleContract.ratio()
-     expect(ratio).to.eq(1)
+     expect(ratio).to.eq(5)
     });
 
     it("uses a valid ERC20 as payment token", async () => {
@@ -106,32 +117,45 @@ let tokenSaleContractFactory: TokenSale__factory;
     });
 
       it("burns the correct amount of token", async () => {
-      const ethBalanceAfterBurn = await paymentTokenContract.balanceOf(accounts[1].address);
+      const ethBalanceAfterBurn = await paymentTokenContract.balanceOf(
+        accounts[1].address
+        );
       expect(ethBalanceAfterBurn).to.eq(0);
     });
-    // it("give the correct amount of ETH", async () => {
-    //   throw new Error("Not implemented");
-    // });
     });
 
+    describe("When a user purchases  NFT from the shop contract", async () => {
+      beforeEach(async () => {
+        const allowTx = await paymentTokenContract
+        .connect(accounts[1])
+        .approve(tokenSaleContract.address, NFT_PRICE);
+        const mintTx = await tokenSaleContract.connect(accounts[1]).buyNFT(0); //id of token
+        await mintTx.wait();
+        });  
+      it("gives the correct amount of ETH", async () => {
+        throw new Error("Not implemented");
+      });
+      it("charge the correct amount of ETH", async () => {
+        const nftOwner = await nftContract.ownerOf(0);
+        expect(nftOwner).to.eq(accounts[1].address)
+      });
+      it("update the pool account correctly", async () => {
+        throw new Error("Not implemented");
+      });
+  
+      it("favors the pool with the rounding", async () => {
+        throw new Error("Not implemented");
+      });
+    });
+
+
+
+
+  });
     
   
 
-  // describe("When a user burns their NFT at the Shop contract", async () => {
-  //   it("gives the correct amount of ERC20 tokens", async () => {
-  //     throw new Error("Not implemented");
-  //   });
-  //   it("updates the pool correctly", async () => {
-  //     throw new Error("Not implemented");
-  //   });
-  //   it("update the pool account correctly", async () => {
-  //     throw new Error("Not implemented");
-  //   });
-
-  //   it("favors the pool with the rounding", async () => {
-  //     throw new Error("Not implemented");
-  //   });
-  // });
+  
 
   // describe("When the owner withdraw from the Shop contract", async () => {
   //   it("recovers the right amount of ERC20 tokens", async () => {
@@ -142,5 +166,5 @@ let tokenSaleContractFactory: TokenSale__factory;
   //     throw new Error("Not implemented");
   //   });
   // });
-});
+
 });
