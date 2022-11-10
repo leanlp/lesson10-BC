@@ -16,7 +16,7 @@ contract TokenSale {
         paymentToken = IMyERC20(_paymentToken);
     }
 
-    function buyToken() external payable {
+    function buyTokens() external payable {
         uint256 amount = msg.value / ratio;
         paymentToken.mint(msg.sender, amount);
 

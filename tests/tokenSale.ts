@@ -65,7 +65,7 @@ let tokenSaleContractFactory: TokenSale__factory;
     beforeEach(async () => {
     const tx = await tokenSaleContract
     .connect(accounts[1])
-    .buyToken({value: buyValue});
+    .buyTokens({value: buyValue});
   await tx.wait();
     });
 
