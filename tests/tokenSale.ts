@@ -6,7 +6,7 @@ import { ERC20Burnable__factory, ERC20__factory, ERC721__factory, MyERC20, MyERC
 
 
 
-const TEST_RATIO = 10;
+const TEST_RATIO = 1;
 
 
 
@@ -64,7 +64,7 @@ let tokenSaleContractFactory: TokenSale__factory;
   });
 
   describe("When a user purchase an ERC20 from the Token contract", async () => {
-    const buyValue = ethers.utils.parseEther("2");
+    const buyValue = ethers.utils.parseEther("1");
     let ethBalanceBefore: BigNumber
     let gasCost: BigNumber
     beforeEach(async () => {
@@ -78,7 +78,7 @@ let tokenSaleContractFactory: TokenSale__factory;
   gasCost = gasUsed.mul(pricePerGas);
     });
 
-    it("gives the correct amount of tokens", async () => {
+    it("change the correct amount of ETH", async () => {
       const ethBalanceAfter = await accounts[1].getBalance();
       const diff = ethBalanceBefore.sub(ethBalanceAfter);
       const expectDiff = buyValue.add(gasCost);
@@ -86,7 +86,6 @@ let tokenSaleContractFactory: TokenSale__factory;
       expect(error).to.eq(0);
     });
   
-  describe("When a user burns an ERC20 at the Token contract", async () => {
     it("gives the correct amount of ETH", async () => {
       const tokenBalance = await paymentTokenContract.balanceOf(
       accounts[1].address);
@@ -94,51 +93,54 @@ let tokenSaleContractFactory: TokenSale__factory;
       expect(tokenBalance).to.eq(expectedBalance)
     });
 
-    });
-   describe("When a user ", async () => {
+   describe("When a user burns an ERC20 at the Token contract", async () => {
     beforeEach(async () => {
       const expectedBalance = buyValue.div(TEST_RATIO);
-      const tx = await paymentTokenContract
+      const allowTx = await paymentTokenContract
       .connect(accounts[1])
-      .transfer(tokenSaleContract.address, expectedBalance);
-        await tx.wait()
-    })
-    it("charges the correct amount of ETH", async () => {
-      throw new Error("Not implemented");
+      .approve(tokenSaleContract.address, expectedBalance);
+      const burnTx = await tokenSaleContract
+      .connect(accounts[1])
+      .returnTokens(expectedBalance);
+        await burnTx.wait();
     });
 
-    it("updates the owner account correctly", async () => {
-      throw new Error("Not implemented");
+      it("burns the correct amount of token", async () => {
+      const ethBalanceAfterBurn = await paymentTokenContract.balanceOf(accounts[1].address);
+      expect(ethBalanceAfterBurn).to.eq(0);
     });
-
-    it("update the pool account correctly", async () => {
-      throw new Error("Not implemented");
-    });
-
-    it("favors the pool with the rounding", async () => {
-      throw new Error("Not implemented");
-    });
+    // it("give the correct amount of ETH", async () => {
+    //   throw new Error("Not implemented");
+    // });
     });
 
     
-  });
+  
 
-  describe("When a user burns their NFT at the Shop contract", async () => {
-    it("gives the correct amount of ERC20 tokens", async () => {
-      throw new Error("Not implemented");
-    });
-    it("updates the pool correctly", async () => {
-      throw new Error("Not implemented");
-    });
-  });
+  // describe("When a user burns their NFT at the Shop contract", async () => {
+  //   it("gives the correct amount of ERC20 tokens", async () => {
+  //     throw new Error("Not implemented");
+  //   });
+  //   it("updates the pool correctly", async () => {
+  //     throw new Error("Not implemented");
+  //   });
+  //   it("update the pool account correctly", async () => {
+  //     throw new Error("Not implemented");
+  //   });
 
-  describe("When the owner withdraw from the Shop contract", async () => {
-    it("recovers the right amount of ERC20 tokens", async () => {
-      throw new Error("Not implemented");
-    });
+  //   it("favors the pool with the rounding", async () => {
+  //     throw new Error("Not implemented");
+  //   });
+  // });
 
-    it("updates the owner account correctly", async () => {
-      throw new Error("Not implemented");
-    });
-  });
+  // describe("When the owner withdraw from the Shop contract", async () => {
+  //   it("recovers the right amount of ERC20 tokens", async () => {
+  //     throw new Error("Not implemented");
+  //   });
+
+  //   it("updates the owner account correctly", async () => {
+  //     throw new Error("Not implemented");
+  //   });
+  // });
+});
 });
