@@ -6,7 +6,7 @@ import { ERC20Burnable__factory, ERC20__factory, ERC721__factory, MyERC20, MyERC
 
 
 
-const TEST_RATIO = 1;
+const TEST_RATIO = 10;
 
 
 
@@ -86,18 +86,23 @@ let tokenSaleContractFactory: TokenSale__factory;
       expect(error).to.eq(0);
     });
   
-
   describe("When a user burns an ERC20 at the Token contract", async () => {
     it("gives the correct amount of ETH", async () => {
-      const tokenBalance = await paymentTokenContract.balanceOf(accounts[1].address);
+      const tokenBalance = await paymentTokenContract.balanceOf(
+      accounts[1].address);
       const expectedBalance = buyValue.div(TEST_RATIO)
       expect(tokenBalance).to.eq(expectedBalance)
     });
 
     });
-  });
-
-  describe("When a user purchase a NFT from the Shop contract", async () => {
+   describe("When a user ", async () => {
+    beforeEach(async () => {
+      const expectedBalance = buyValue.div(TEST_RATIO);
+      const tx = await paymentTokenContract
+      .connect(accounts[1])
+      .transfer(tokenSaleContract.address, expectedBalance);
+        await tx.wait()
+    })
     it("charges the correct amount of ETH", async () => {
       throw new Error("Not implemented");
     });
@@ -113,6 +118,9 @@ let tokenSaleContractFactory: TokenSale__factory;
     it("favors the pool with the rounding", async () => {
       throw new Error("Not implemented");
     });
+    });
+
+    
   });
 
   describe("When a user burns their NFT at the Shop contract", async () => {
