@@ -94,11 +94,9 @@ let tokenSaleContractFactory: TokenSale__factory;
       expect(tokenBalance).to.eq(expectedBalance)
     });
 
-    it("burns the correct amount of tokens", async () => {
-      throw new Error("Not implemented");
     });
   });
-});
+
   describe("When a user purchase a NFT from the Shop contract", async () => {
     it("charges the correct amount of ETH", async () => {
       throw new Error("Not implemented");
